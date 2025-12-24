@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Career Screener</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container glass">
+    <h1>MNC Career Screener</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Upload Resume PDFs</label>
+        <input type="file" name="resumes" multiple required>
+        <button type="submit">Screen Resumes</button>
+    </form>
+
+    {% for r in reports %}
+    <div class="result-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>{{ r.name }}</h3>
+            <form action="/download" method="POST">
+                <input type="hidden" name="name" value="{{ r.name }}">
+                <input type="hidden" name="matches" value='{{ r.matches | tojson }}'>
+                <input type="hidden" name="companies" value='{{ r.company_matches | tojson }}'>
+                <button type="submit" style="width:auto; padding:5px 15px; background:#2c5364;">📥 PDF Report</button>
+            </form>
+        </div>
+        
+        <p><strong>Culture Fit:</strong> 
+        {% for cf in r.company_matches[:2] %} {{ cf.company }} ({{ cf.fit_score }}%) | {% endfor %}</p>
+
+        <table>
+            {% for m in r.matches %}
+            <tr>
+                <td><strong>{{ m.role }}</strong></td>
+                <td>{{ m.score }}%</td>
+                <td class="{{ m.status.lower() }}">{{ m.status }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endfor %}
+</div>
+</body>
+</html>
